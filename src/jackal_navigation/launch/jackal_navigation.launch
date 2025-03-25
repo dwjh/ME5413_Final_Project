@@ -1,0 +1,20 @@
+<launch>
+  <!-- 参数设置：use_map_topic 和 scan_topic -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_base_link"
+      args="0 0 0 0 0 0 map base_link"/>
+  <arg name="use_map_topic" default="true"/>  <!-- 是否使用地图话题 -->
+  <arg name="scan_topic" default="$(eval optenv('JACKAL_LASER_TOPIC', 'front/scan'))" />  <!-- 设置雷达扫描话题 -->
+
+  <!-- 启动 map_server，提供地图 -->
+  <arg name="map_file" default="$(find me5413_world)/maps/3dto2d.yaml"/>  <!-- 设置地图文件 -->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+
+  <!-- 启动 AMCL 节点（自适应蒙特卡洛定位） -->
+  <include file="$(find jackal_navigation)/launch/include/amcl.launch">
+    <arg name="use_map_topic" value="$(arg use_map_topic)" />
+    <arg name="scan_topic"    value="$(arg scan_topic)" />
+  </include>
+
+  <!-- 启动 move_base 节点（导航的路径规划） -->
+  <include file="$(find jackal_navigation)/launch/include/move_base.launch" />
+</launch>

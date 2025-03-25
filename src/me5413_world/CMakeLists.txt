@@ -45,3 +45,8 @@ add_dependencies(goal_publisher_node ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME
 
 add_library(object_spawner_gz_plugin SHARED src/object_spawner_gz_plugin.cpp)
 target_link_libraries(object_spawner_gz_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+
+add_executable(joy_control src/joy_control.cpp)
+target_link_libraries(joy_control ${catkin_LIBRARIES})
+add_dependencies(joy_control ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
