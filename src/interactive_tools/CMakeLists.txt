@@ -88,3 +88,5 @@ target_link_libraries(simple_panel
   ${catkin_LIBRARIES}
   ${QT_LIBRARIES}
 )
+install(FILES rviz_plugin.xml
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})

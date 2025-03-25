@@ -1,0 +1,10 @@
+<launch>
+    <!-- Joy Node Gamepad control node-->
+    <node name="joynode" pkg="joy" type="joy_node" args="" output="screen">
+      <param name="autorepeat_rate" value="10"/>
+      <param name="dev" value="/dev/input/js0"/>
+    </node>
+    <node name="joy_control" pkg="me5413_world" type="joy_control" output="screen"/>
+  
+  </launch>
+  

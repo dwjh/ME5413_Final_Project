@@ -1,0 +1,39 @@
+<launch>
+  <param name="/use_sim_time" value="true" />
+
+  <!-- 静态TF变换链 -->
+  <!-- 确保世界到map的连接 -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="world_to_map"
+        args="0 0 0 0 0 0 world map" />
+        
+  <!-- 确保世界到odom的连接 -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom"
+        args="0 0 0 0 0 0 map odom" />
+  
+  <!-- odom到base_link的连接 -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="odom_base_broadcaster"
+        args="0 0 0 0 0 0 odom base_link" />
+        
+  <!-- base_link到velodyne的连接 -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="base_to_velodyne"
+        args="0 0 0 0 0 0 base_link velodyne" /> #雷达倾角 000000
+
+  <!-- Cartographer node -->
+  <node name="cartographer_node" pkg="cartographer_ros"
+      type="cartographer_node" args="
+          -configuration_directory $(find cartographer_ros)/configuration_files
+          -configuration_basename jackal_3d.lua"
+      output="screen">
+    <remap from="points2" to="/mid/points" />
+    <remap from="imu" to="/imu/data" />
+    <remap from="odom" to="/odometry/filtered" />
+  </node>
+
+  <!-- Cartographer trajectory visualization -->
+  <node name="cartographer_occupancy_grid_node" pkg="cartographer_ros"
+      type="cartographer_occupancy_grid_node" args="-resolution 0.05" />
+
+  <!-- visualization -->
+  <!-- <node name="rviz" pkg="rviz" type="rviz" required="true"
+      args="-d $(find cartographer_ros)/configuration_files/demo_3d.rviz" /> -->
+</launch> 
