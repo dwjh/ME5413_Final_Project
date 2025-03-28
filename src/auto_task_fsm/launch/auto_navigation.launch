@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- 启动导航相关节点 -->
+    <include file="$(find jackal_navigation)/launch/jackal_navigation.launch" />
+    
+    <!-- 启动状态机节点 -->
+    <node pkg="auto_task_fsm" type="navigation_state_machine.py" name="navigation_state_machine" output="screen">
+        <rosparam command="load" file="$(find auto_task_fsm)/config/navigation_goals.yaml" />
+    </node>
+</launch> 

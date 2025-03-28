@@ -3,15 +3,15 @@ origin_z: 0.0
 z_resolution: 1
 z_voxels: 2
 
-obstacle_range: 2.5
-raytrace_range: 3.0
+obstacle_range: 1.0  # 减小障碍物检测范围
+raytrace_range: 1.0  # 减小激光雷达检测范围
 
 publish_voxel_map: false
 transform_tolerance: 0.5
 meter_scoring: true
 
-footprint: [[-0.21, -0.165], [-0.21, 0.165], [0.21, 0.165], [0.21, -0.165]]
-footprint_padding: 0.1
+footprint: [[-0.21, -0.155], [-0.21, 0.155], [0.21, 0.155], [0.21, -0.155]]  # 保持实际机器人尺寸
+footprint_padding: 0.05  # 保持较小的padding
 
 plugins:
 - {name: obstacles_layer, type: "costmap_2d::ObstacleLayer"}
@@ -19,7 +19,9 @@ plugins:
 
 obstacles_layer:
   observation_sources: scan
-  scan: {sensor_frame: front_laser, data_type: LaserScan, topic: front/scan, marking: true, clearing: true, min_obstacle_height: -2.0, max_obstacle_height: 2.0, obstacle_range: 2.5, raytrace_range: 3.0}
+  scan: {sensor_frame: front_laser, data_type: LaserScan, topic: front/scan, 
+  marking: true, clearing: true, min_obstacle_height: -0.5, max_obstacle_height: 0.5, obstacle_range: 1.0, raytrace_range: 1.0}  # 与上面的检测范围保持一致
 
 inflater_layer:
- inflation_radius: 0.30
+  inflation_radius: 0.05 # 减小膨胀半径，使机器人更敢于通过狭窄通道
+  cost_scaling_factor: 0.3  # 减小成本缩放因子，使膨胀区域更平滑
