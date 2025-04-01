@@ -27,6 +27,23 @@ catkin_package(
   # CATKIN_DEPENDS geometry_msgs nav_msgs roscpp rospy std_msgs visualization_msgs
   # DEPENDS system_lib
 )
+# 安装 Python 脚本
+catkin_install_python(PROGRAMS
+  scripts/bridge_detector_color2.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+catkin_install_python(PROGRAMS
+  scripts/obstacle_detector.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+catkin_install_python(PROGRAMS
+  scripts/object_detector.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+catkin_install_python(PROGRAMS
+  scripts/imu_bias_corrector.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 include_directories(
   include

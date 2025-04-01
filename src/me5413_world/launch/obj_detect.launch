@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="me5413_world" type="object_detector.py" name="object_detector" output="screen">
+    </node>
+</launch>

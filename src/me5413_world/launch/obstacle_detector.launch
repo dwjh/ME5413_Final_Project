@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- 启动障碍物检测节点 -->
+    <node pkg="me5413_world" type="obstacle_detector.py" name="obstacle_detector" output="screen">
+    </node>
+</launch> 

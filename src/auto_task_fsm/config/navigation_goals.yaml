@@ -1,0 +1,70 @@
+navigation_goals:
+  # test 位置
+  test:
+    position:
+      x: 16
+      y: 5
+      z: 0.0
+    orientation:
+      x: 0.0
+      y: 0.0
+      z: 0.0
+      w: 1.0
+  # 桥梁位置
+  bridge:
+    position:
+      x: 5.0
+      y: 0.0
+      z: 0.0
+    orientation:
+      x: 0.0
+      y: 0.0
+      z: 0.0
+      w: 1.0
+  
+  # 目标箱子位置
+  target_box:
+    position:
+      x: 10.0
+      y: 0.0
+      z: 0.0
+    orientation:
+      x: 0.0
+      y: 0.0
+      z: 0.0
+      w: 1.0 
+  # cornor1
+  cornor1:
+    position: 
+      x: 18.22776985168457
+      y: 6.193604946136475
+      z: 0.0
+    orientation: 
+      x: 0.0
+      y: 0.0
+      z: -0.5706009651369132
+      w: 0.821227458494188
+
+  # cornor2
+  cornor2:
+    position: 
+      x: 24.396377563476562
+      y: -14.264960289001465
+      z: 0.0
+    orientation: 
+      x: 0.0
+      y: 0.0
+      z: -0.9726610726078753
+      w: 0.23222927858755799
+
+  # test
+  test2:
+    position: 
+      x: 14.655643463134766
+      y: -1.1085336208343506
+      z: 0.0
+    orientation: 
+      x: 0.0
+      y: 0.0
+      z: -0.983121193982843
+      w: 0.18295550809349578

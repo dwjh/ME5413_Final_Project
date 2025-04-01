@@ -1,10 +1,55 @@
 local_costmap:
    global_frame: map
    robot_base_frame: base_link
-   update_frequency: 20.0
-   publish_frequency: 5.0
+   update_frequency: 10.0
+   publish_frequency: 10.0
    width: 10.0
    height: 10.0
-   resolution: 0.05
-   static_map: false
+   resolution: 0.1
+   static_map: true
    rolling_window: true
+   transform_tolerance: 0.5
+   always_send_full_costmap: true
+   track_unknown_space: false
+   
+   plugins:
+     - {name: static_layer, type: "costmap_2d::StaticLayer"}
+     - {name: obstacle_layer, type: "costmap_2d::ObstacleLayer"}
+     - {name: inflation_layer, type: "costmap_2d::InflationLayer"}
+
+   static_layer:
+     enabled: true
+     map_topic: /map
+     subscribe_to_updates: true
+     track_unknown_space: false
+
+   obstacle_layer:
+     enabled: true
+     observation_sources: laser_scan_sensor 
+    #  point_cloud_sensor
+     laser_scan_sensor: {
+       sensor_frame: tim551,
+       data_type: LaserScan,
+       topic: front/scan,
+       marking: true,
+       clearing: true,
+       min_obstacle_height: -0.1,
+       max_obstacle_height: 2.0,
+       obstacle_range: 5.0,
+       raytrace_range: 5.5
+     }
+    #  point_cloud_sensor: {
+    #    sensor_frame: velodyne,
+    #    data_type: PointCloud2,
+    #    topic: /mid/points,
+    #    marking: true,
+    #    clearing: true,
+    #    min_obstacle_height: -0.1,
+    #    max_obstacle_height: 0.8,
+    #    obstacle_range: 5.0,
+    #    raytrace_range: 5.5
+    #  }
+
+   inflation_layer:
+     inflation_radius: 0.01
+     cost_scaling_factor: 5.0

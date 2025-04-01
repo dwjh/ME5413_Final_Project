@@ -14,8 +14,10 @@
 
     <!-- Add our jackal robot into the simulation -->
     <include file="$(find me5413_world)/launch/include/spawn_jackal.launch"/>
+    <!-- <node pkg="me5413_world" type="obstacle_detector.py" name="obstacle_detector" output="screen">
+    </node> -->
     
     <!-- Load the destination configuration -->
     <rosparam command="load" file="$(find me5413_world)/config/config.yaml" />
-
+    <node name="imu_bias_corrector" pkg="me5413_world" type="imu_bias_corrector.py" output="screen" />
 </launch>
