@@ -17,5 +17,5 @@ global_costmap:
    - {name: inflater_layer, type: "costmap_2d::InflationLayer"}
 
    inflater_layer:
-     inflation_radius: 0.3    # 全局地图使用更大的膨胀半径
+     inflation_radius: 0.33    # 全局地图使用更大的膨胀半径
      cost_scaling_factor: 0.3  # 更平缓的代价衰减

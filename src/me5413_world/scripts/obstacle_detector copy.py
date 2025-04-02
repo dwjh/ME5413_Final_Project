@@ -10,7 +10,6 @@ from cv_bridge import CvBridge
 from tf2_ros import Buffer, TransformListener, TransformException
 import tf2_geometry_msgs
 import cv2
-from std_msgs.msg import Header
 
 class CubeDetector3D:
     def __init__(self):
@@ -38,8 +37,6 @@ class CubeDetector3D:
         # 发布检测结果
         self.center_pub = rospy.Publisher("/block_center", PointStamped, queue_size=10)
         self.marker_pub = rospy.Publisher("/block_marker", Marker, queue_size=10)
-        # 添加点云发布器
-        self.centers_cloud_pub = rospy.Publisher("/block_centers", PointCloud2, queue_size=10)
 
         self.map_frame = "map"
         self.sensor_frame = "velodyne"  # 点云的frame
@@ -325,7 +322,7 @@ class CubeDetector3D:
             point_laser = self.tf_buffer.transform(point_stamped, self.laser_frame, rospy.Duration(1.0))
             
             # 检查点是否在激光雷达的合理高度范围内
-            LASER_HEIGHT_TOLERANCE = 0.08  # 减小高度容差到8cm
+            LASER_HEIGHT_TOLERANCE = 0.1  # 激光雷达扫描平面上下10cm范围内的点才考虑
             if abs(point_laser.point.z) > LASER_HEIGHT_TOLERANCE:
                 return None
             
@@ -348,16 +345,15 @@ class CubeDetector3D:
             # 获取该方向上的激光测量距离
             range_measurement = self.laser_scan.ranges[beam_index]
             
-            # 更严格的距离限制检查
-            MAX_VALID_RANGE = 8.0  # 减小最大有效距离到4米
-            MIN_VALID_RANGE = 0.01  # 添加最小有效距离0.1米
-            if (range_measurement < MIN_VALID_RANGE or 
-                range_measurement > MAX_VALID_RANGE or 
+            # 添加距离限制检查
+            MAX_VALID_RANGE = 5.0  # 设置最大有效距离为5米
+            if (range_measurement < self.laser_scan.range_min or 
+                range_measurement > MAX_VALID_RANGE or  # 使用自定义的最大距离限制
                 range_measurement > self.laser_scan.range_max):
                 return None
             
-            # 更严格的距离匹配检查
-            DISTANCE_THRESHOLD = 0.15  # 减小距离差异阈值到15cm
+            # 比较投影距离和激光测量距离
+            DISTANCE_THRESHOLD = 0.2  # 20cm的差异阈值
             if abs(proj_distance - range_measurement) > DISTANCE_THRESHOLD:
                 return None
             
@@ -390,12 +386,12 @@ class CubeDetector3D:
             try:
                 # 尝试使用2D激光雷达进行位置修正
                 laser_position = self.get_laser_position(center)
-                if laser_position is None:
-                    continue  # 如果没有有效的激光雷达数据，跳过这个点
-                    
-                # 使用激光雷达位置为主，LiDAR位置为辅
-                fusion_weight = 0.8  # 提高2D激光雷达权重到0.8
-                fused_position = fusion_weight * laser_position + (1 - fusion_weight) * center
+                if laser_position is not None:
+                    # 使用加权平均融合两个位置
+                    fusion_weight = 0.3  # 2D激光雷达权重
+                    fused_position = (1 - fusion_weight) * center + fusion_weight * laser_position
+                else:
+                    fused_position = center
 
                 # 转换到地图坐标系
                 point_msg = PointStamped()
@@ -625,45 +621,49 @@ class CubeDetector3D:
 
     def publish_all_blocks(self, current_time):
         """发布所有跟踪的方块和永久保存的方块"""
-        # 创建一个列表来存储所有要发布的中心点
-        all_centers = []
-        
-        # 收集跟踪中的方块中心点
+        # 发布跟踪中的方块
         for track_id, track_info in self.tracked_objects.items():
             if track_info['score'] < self.min_track_score:
                 continue
 
+            # 发布中心点
+            point_msg = PointStamped()
+            point_msg.header.stamp = current_time
+            point_msg.header.frame_id = self.sensor_frame
+            point_msg.point.x = track_info['position'][0]
+            point_msg.point.y = track_info['position'][1]
+            point_msg.point.z = track_info['position'][2]
+
             try:
                 # 转换到map坐标系
-                point_msg = PointStamped()
-                point_msg.header.stamp = current_time
-                point_msg.header.frame_id = self.sensor_frame
-                point_msg.point.x = track_info['position'][0]
-                point_msg.point.y = track_info['position'][1]
-                point_msg.point.z = track_info['position'][2]
-                
                 point_map = self.tf_buffer.transform(point_msg, self.map_frame, rospy.Duration(1.0))
-                all_centers.append([point_map.point.x, point_map.point.y, point_map.point.z])  # 存储为列表
-                
-                # 发布可视化marker
                 self.publish_marker(point_map.point, track_id, track_info['score'])
-                
+                self.center_pub.publish(point_map)  # 发布跟踪中方块的中心点
             except TransformException as e:
                 rospy.logwarn_throttle(1, f"坐标转换失败: {e}")
 
-        # 收集永久方块中心点
+        # 发布永久方块
         for block_id, block_info in self.permanent_blocks.items():
+            point = PointStamped()
+            point.header.stamp = current_time
+            point.header.frame_id = self.map_frame
+            
             # 使用稳定位置（如果可用）
             if 'stable_position' in block_info and block_info['update_count'] >= self.min_observations:
                 map_pos = block_info['stable_position']
             else:
                 map_pos = block_info['map_position']
                 
-            all_centers.append([map_pos[0], map_pos[1], map_pos[2]])  # 直接添加到列表
+            point.point.x = map_pos[0]
+            point.point.y = map_pos[1]
+            point.point.z = map_pos[2]
             
-            # 获取置信度并发布marker（只显示高置信度的marker）
+            # 获取置信度
             confidence = block_info.get('confidence', 0.5)
+            
+            # 只有高置信度的方块才发布
             if confidence > self.confidence_threshold:
+                # 发布marker
                 marker = Marker()
                 marker.header.frame_id = self.map_frame
                 marker.header.stamp = current_time
@@ -671,9 +671,7 @@ class CubeDetector3D:
                 marker.id = block_id
                 marker.type = Marker.CUBE
                 marker.action = Marker.ADD
-                marker.pose.position.x = map_pos[0]
-                marker.pose.position.y = map_pos[1]
-                marker.pose.position.z = map_pos[2]
+                marker.pose.position = point.point
                 
                 angle = 20.0 * np.pi / 180.0
                 marker.pose.orientation.x = 0.0
@@ -693,30 +691,9 @@ class CubeDetector3D:
                 marker.lifetime = rospy.Duration(0)  # 永不过期
                 
                 self.marker_pub.publish(marker)
-        
-        if all_centers:
-            # 创建点云消息
-            header = Header()
-            header.stamp = current_time
-            header.frame_id = self.map_frame
-            
-            # 将中心点列表转换为numpy数组
-            centers_array = np.array(all_centers, dtype=np.float32)
-            
-            # 创建点云消息
-            centers_cloud = pc2.create_cloud_xyz32(header, centers_array)
-            
-            # 发布点云
-            self.centers_cloud_pub.publish(centers_cloud)
-            
-            # 同时也发布单个点（保持向后兼容）
-            for center in all_centers:
-                point_msg = PointStamped()
-                point_msg.header = header
-                point_msg.point.x = center[0]
-                point_msg.point.y = center[1]
-                point_msg.point.z = center[2]
-                self.center_pub.publish(point_msg)
+                
+                # 只发布高置信度方块的中心点
+                self.center_pub.publish(point)
 
     def publish_marker(self, point, track_id, score):
         try:
