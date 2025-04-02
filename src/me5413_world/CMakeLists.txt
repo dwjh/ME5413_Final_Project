@@ -36,10 +36,10 @@ catkin_install_python(PROGRAMS
   scripts/obstacle_detector.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
-catkin_install_python(PROGRAMS
-  scripts/object_detector.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
+# catkin_install_python(PROGRAMS
+#   scripts/object_detector.py
+#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+# )
 catkin_install_python(PROGRAMS
   scripts/imu_bias_corrector.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
