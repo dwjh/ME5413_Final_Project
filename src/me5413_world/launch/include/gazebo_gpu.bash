@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Gazebo GPU 加速设置
+export GAZEBO_GPU_RAY_GPU=1
+export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:$(rospack find me5413_world)/models
+
+# 渲染质量设置
+export OGRE_RTT_MODE=FBO
+export OGRE_THREADING=1
+
+# GPU性能设置
+export GAZEBO_GPU_RAY_QUALITY=1
+export GAZEBO_VISUAL_QUALITY=2
+
+# 禁用一些不必要的功能
+export GAZEBO_DISABLE_PHYSICS_GRID=1
+export GAZEBO_DISABLE_PHYSICS_LINKS=1
+export GAZEBO_DISABLE_VISUAL_LINKS=1
+
+# 降低更新频率
+export GAZEBO_PHYSICS_UPDATE_RATE=250
+export GAZEBO_SENSOR_UPDATE_RATE=20
+
+# 其他性能优化
+export GAZEBO_CACHE_SIZE=1000
+export GAZEBO_PRELOAD_MODELS=0 

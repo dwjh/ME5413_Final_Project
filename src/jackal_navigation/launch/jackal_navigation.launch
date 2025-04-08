@@ -6,7 +6,7 @@
   <arg name="scan_topic" default="$(eval optenv('JACKAL_LASER_TOPIC', 'front/scan'))" />  <!-- 设置雷达扫描话题 -->
 
   <!-- 启动 map_server，提供地图 -->
-  <arg name="map_file" default="$(find me5413_world)/maps/3dto2d.yaml"/>  <!-- 设置地图文件 -->
+  <arg name="map_file" default="$(find me5413_world)/maps/my_map.yaml"/>  <!-- 设置地图文件 -->
   <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
 
   <!-- 启动 AMCL 节点（自适应蒙特卡洛定位） -->
@@ -17,4 +17,9 @@
 
   <!-- 启动 move_base 节点（导航的路径规划） -->
   <include file="$(find jackal_navigation)/launch/include/move_base.launch" />
+
+  <!-- Launch Rviz with our settings -->
+  <node type="rviz" name="rviz" pkg="rviz" args="-d $(find me5413_world)/rviz/navigation.rviz" output="log" respawn="true"/>
+  <!-- <node ns="me5413_world" pkg="me5413_world" type="goal_publisher_node" name="goal_publisher_node" output="screen" /> -->
+
 </launch>
